@@ -1,0 +1,48 @@
+### Get all students
+GET http://localhost:3000/api/students
+
+### Get student by ID
+GET http://localhost:3000/api/students/1
+
+### Get statistics
+GET http://localhost:3000/api/stats
+
+### Search students
+GET http://localhost:3000/api/students/search/john
+
+### Create new student
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+  "student_id": "STU004",
+  "first_name": "Alice",
+  "last_name": "Johnson",
+  "email": "alice.johnson@email.com",
+  "phone": "+1234567893",
+  "date_of_birth": "2000-12-15",
+  "gender": "Female",
+  "address": "321 Elm St, City",
+  "course": "Biology",
+  "status": "Active"
+}
+
+### Update student
+PUT http://localhost:3000/api/students/1
+Content-Type: application/json
+
+{
+  "student_id": "STU001",
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john.doe@email.com",
+  "phone": "+1234567890",
+  "date_of_birth": "2000-05-15",
+  "gender": "Male",
+  "address": "123 Main St, City",
+  "course": "Computer Science",
+  "status": "Active"
+}
+
+### Delete student
+DELETE http://localhost:3000/api/students/3
