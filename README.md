@@ -201,6 +201,3 @@ For support or questions:
 - Review the code documentation
 - Contact the development team
 
----
-
-**Built with ❤️ for efficient student management**
