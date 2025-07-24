@@ -1,0 +1,29 @@
+{
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": true,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit"
+    },
+    "files.associations": {
+        "*.js": "javascript",
+        "*.json": "jsonc"
+    },
+    "emmet.includeLanguages": {
+        "javascript": "javascriptreact"
+    },
+    "javascript.preferences.quoteStyle": "single",
+    "typescript.preferences.quoteStyle": "single",
+    "html.format.indentInnerHtml": true,
+    "css.format.enable": true,
+    "json.format.enable": true,
+    "files.exclude": {
+        "node_modules": true,
+        "*.db": false
+    },
+    "search.exclude": {
+        "node_modules": true,
+        "package-lock.json": true
+    }
+}
