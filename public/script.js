@@ -53,7 +53,7 @@ class StudentManager {
             this.showLoading(true);
             const response = await fetch('/api/students');
             const data = await response.json();
-            
+
             if (response.ok) {
                 this.students = data.students;
                 this.renderStudents(this.students);
@@ -71,7 +71,7 @@ class StudentManager {
         try {
             const response = await fetch('/api/stats');
             const data = await response.json();
-            
+
             if (response.ok) {
                 document.getElementById('totalStudents').textContent = data.total || 0;
                 document.getElementById('activeStudents').textContent = data.active || 0;
@@ -147,7 +147,7 @@ class StudentManager {
         try {
             const response = await fetch(`/api/students/${id}`);
             const data = await response.json();
-            
+
             if (response.ok) {
                 this.currentEditId = id;
                 document.getElementById('modalTitle').textContent = 'Edit Student';
@@ -182,10 +182,10 @@ class StudentManager {
 
     async handleFormSubmit(e) {
         e.preventDefault();
-        
+
         const formData = new FormData(e.target);
         const studentData = Object.fromEntries(formData.entries());
-        
+
         // Validate required fields
         if (!studentData.student_id || !studentData.first_name || !studentData.last_name || !studentData.email) {
             this.showToast('Please fill in all required fields', 'error');
@@ -195,7 +195,7 @@ class StudentManager {
         try {
             const url = this.currentEditId ? `/api/students/${this.currentEditId}` : '/api/students';
             const method = this.currentEditId ? 'PUT' : 'POST';
-            
+
             const response = await fetch(url, {
                 method: method,
                 headers: {
@@ -203,9 +203,9 @@ class StudentManager {
                 },
                 body: JSON.stringify(studentData)
             });
-            
+
             const data = await response.json();
-            
+
             if (response.ok) {
                 this.showToast(
                     this.currentEditId ? 'Student updated successfully!' : 'Student added successfully!',
@@ -234,9 +234,9 @@ class StudentManager {
             const response = await fetch(`/api/students/${this.currentDeleteId}`, {
                 method: 'DELETE'
             });
-            
+
             const data = await response.json();
-            
+
             if (response.ok) {
                 this.showToast('Student deleted successfully!', 'success');
                 this.closeDeleteModal();
@@ -252,7 +252,7 @@ class StudentManager {
 
     async handleSearch(e) {
         const searchTerm = e.target.value.trim();
-        
+
         if (searchTerm === '') {
             this.renderStudents(this.students);
             return;
@@ -263,7 +263,7 @@ class StudentManager {
         try {
             const response = await fetch(`/api/students/search/${encodeURIComponent(searchTerm)}`);
             const data = await response.json();
-            
+
             if (response.ok) {
                 this.renderStudents(data.students);
             } else {
@@ -298,7 +298,7 @@ class StudentManager {
     showLoading(show) {
         const loading = document.getElementById('loading');
         const table = document.getElementById('studentsTable');
-        
+
         if (show) {
             loading.style.display = 'block';
             table.style.display = 'none';
@@ -312,27 +312,27 @@ class StudentManager {
         const toastContainer = document.getElementById('toastContainer');
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
-        
-        const icon = type === 'success' ? 'fa-check-circle' : 
-                     type === 'error' ? 'fa-exclamation-circle' : 
-                     'fa-info-circle';
-        
+
+        const icon = type === 'success' ? 'fa-check-circle' :
+            type === 'error' ? 'fa-exclamation-circle' :
+                'fa-info-circle';
+
         toast.innerHTML = `
             <div class="toast-content">
                 <i class="fas ${icon} toast-icon"></i>
                 <span class="toast-message">${message}</span>
             </div>
         `;
-        
+
         toastContainer.appendChild(toast);
-        
+
         // Auto remove after 5 seconds
         setTimeout(() => {
             if (toast.parentNode) {
                 toast.parentNode.removeChild(toast);
             }
         }, 5000);
-        
+
         // Remove on click
         toast.addEventListener('click', () => {
             if (toast.parentNode) {
@@ -342,9 +342,103 @@ class StudentManager {
     }
 }
 
+// CSV Upload and Summary Dashboard
+function handleCSVUpload() {
+    const form = document.getElementById('csvUploadForm');
+    const msgDiv = document.getElementById('csvUploadMsg');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fileInput = document.getElementById('csvFile');
+        if (!fileInput.files.length) return;
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        msgDiv.textContent = 'Uploading...';
+        try {
+            const res = await fetch('/api/students/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (res.ok) {
+                msgDiv.textContent = data.message;
+                window.studentManager.loadStudents();
+                loadSummaryDashboard();
+            } else {
+                msgDiv.textContent = data.error || 'Upload failed.';
+            }
+        } catch (err) {
+            msgDiv.textContent = 'Network error.';
+        }
+        fileInput.value = '';
+    });
+}
+
+let summaryBarChart, summaryPieChart;
+function loadSummaryDashboard() {
+    fetch('/api/students/summary')
+        .then(res => res.json())
+        .then(summary => {
+            // For simplicity, show the first intake's summary
+            const intakes = Object.keys(summary);
+            if (!intakes.length) return;
+            const intake = intakes[0];
+            const data = summary[intake];
+            // Bar chart: CGPA Ranges
+            const barCtx = document.getElementById('summaryBarChart').getContext('2d');
+            if (summaryBarChart) summaryBarChart.destroy();
+            summaryBarChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.cgpaRanges),
+                    datasets: [{
+                        label: 'Number of Students',
+                        data: Object.values(data.cgpaRanges),
+                        backgroundColor: ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2']
+                    }]
+                },
+                options: {
+                    plugins: { title: { display: true, text: `CGPA Distribution (${intake})` } },
+                    responsive: true,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+            // Pie chart: Gender + Level
+            const pieCtx = document.getElementById('summaryPieChart').getContext('2d');
+            if (summaryPieChart) summaryPieChart.destroy();
+            const pieLabels = [];
+            const pieData = [];
+            const pieColors = [];
+            const colorMap = { 'Female P1': '#a0cbe8', 'Female P2': '#ffbe7d', 'Female P3': '#ff9d9a', 'Male P1': '#59a14f', 'Male P2': '#8cd17d', 'Male P3': '#b6992d' };
+            ['Female', 'Male'].forEach(gender => {
+                ['P1', 'P2', 'P3'].forEach(level => {
+                    const label = `${gender} ${level}`;
+                    pieLabels.push(label);
+                    pieData.push(data.levelGender[gender][level]);
+                    pieColors.push(colorMap[label]);
+                });
+            });
+            summaryPieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: pieLabels,
+                    datasets: [{
+                        data: pieData,
+                        backgroundColor: pieColors
+                    }]
+                },
+                options: {
+                    plugins: { title: { display: true, text: `Gender & Level Distribution (${intake})` } },
+                    responsive: true
+                }
+            });
+        });
+}
+
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.studentManager = new StudentManager();
+    handleCSVUpload();
+    loadSummaryDashboard();
 });
 
 // Handle page refresh/reload

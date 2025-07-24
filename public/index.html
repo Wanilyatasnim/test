@@ -1,206 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Management System - Admin Panel</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <h1><i class="fas fa-graduation-cap"></i> Student Management System</h1>
-                <div class="header-actions">
-                    <button class="btn btn-primary" id="addStudentBtn">
-                        <i class="fas fa-plus"></i> Add Student
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Student Management System - Admin Panel</title>
+        <link rel="stylesheet" href="styles.css">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    </head>
+
+    <body>
+        <div class="container">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-content">
+                    <h1><i class="fas fa-graduation-cap"></i> Student Management System</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" id="addStudentBtn">
+                            <i class="fas fa-plus"></i> Add Student
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Stats -->
+            <section class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalStudents">0</h3>
+                        <p>Total Students</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon active">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="activeStudents">0</h3>
+                        <p>Active Students</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon inactive">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="inactiveStudents">0</h3>
+                        <p>Inactive Students</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon courses">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalCourses">0</h3>
+                        <p>Courses</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Search and Filter -->
+            <section class="search-section">
+                <div class="search-container">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput"
+                            placeholder="Search students by name, email, ID, or course...">
+                    </div>
+                    <button class="btn btn-secondary" id="clearSearch">
+                        <i class="fas fa-times"></i> Clear
                     </button>
                 </div>
-            </div>
-        </header>
+            </section>
 
-        <!-- Dashboard Stats -->
-        <section class="dashboard-stats">
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 id="totalStudents">0</h3>
-                    <p>Total Students</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon active">
-                    <i class="fas fa-user-check"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 id="activeStudents">0</h3>
-                    <p>Active Students</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon inactive">
-                    <i class="fas fa-user-times"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 id="inactiveStudents">0</h3>
-                    <p>Inactive Students</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon courses">
-                    <i class="fas fa-book"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 id="totalCourses">0</h3>
-                    <p>Courses</p>
-                </div>
-            </div>
-        </section>
+            <!-- Bulk Upload CSV -->
+            <section class="upload-section">
+                <form id="csvUploadForm" enctype="multipart/form-data">
+                    <label for="csvFile">Bulk Upload Students (CSV):</label>
+                    <input type="file" id="csvFile" name="file" accept=".csv" required>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> Upload CSV</button>
+                </form>
+                <div id="csvUploadMsg"></div>
+            </section>
 
-        <!-- Search and Filter -->
-        <section class="search-section">
-            <div class="search-container">
-                <div class="search-box">
+            <!-- Student Summary Dashboard -->
+            <section class="summary-section">
+                <h2>Student Summary</h2>
+                <div>
+                    <canvas id="summaryBarChart" height="100"></canvas>
+                </div>
+                <div>
+                    <canvas id="summaryPieChart" height="100"></canvas>
+                </div>
+            </section>
+
+            <!-- Students Table -->
+            <section class="students-section">
+                <div class="table-container">
+                    <table class="students-table" id="studentsTable">
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Course</th>
+                                <th>Status</th>
+                                <th>Enrollment Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <!-- Students will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="loading" id="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Loading students...
+                </div>
+                <div class="no-results" id="noResults" style="display: none;">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Search students by name, email, ID, or course...">
+                    <p>No students found</p>
                 </div>
-                <button class="btn btn-secondary" id="clearSearch">
-                    <i class="fas fa-times"></i> Clear
-                </button>
-            </div>
-        </section>
-
-        <!-- Students Table -->
-        <section class="students-section">
-            <div class="table-container">
-                <table class="students-table" id="studentsTable">
-                    <thead>
-                        <tr>
-                            <th>Student ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Course</th>
-                            <th>Status</th>
-                            <th>Enrollment Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="studentsTableBody">
-                        <!-- Students will be loaded here -->
-                    </tbody>
-                </table>
-            </div>
-            <div class="loading" id="loading">
-                <i class="fas fa-spinner fa-spin"></i> Loading students...
-            </div>
-            <div class="no-results" id="noResults" style="display: none;">
-                <i class="fas fa-search"></i>
-                <p>No students found</p>
-            </div>
-        </section>
-    </div>
-
-    <!-- Add/Edit Student Modal -->
-    <div class="modal" id="studentModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Add New Student</h2>
-                <button class="close-btn" id="closeModal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <form id="studentForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="studentId">Student ID *</label>
-                        <input type="text" id="studentId" name="student_id" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="firstName">First Name *</label>
-                        <input type="text" id="firstName" name="first_name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="lastName">Last Name *</label>
-                        <input type="text" id="lastName" name="last_name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email *</label>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Phone</label>
-                        <input type="tel" id="phone" name="phone">
-                    </div>
-                    <div class="form-group">
-                        <label for="dateOfBirth">Date of Birth</label>
-                        <input type="date" id="dateOfBirth" name="date_of_birth">
-                    </div>
-                    <div class="form-group">
-                        <label for="gender">Gender</label>
-                        <select id="gender" name="gender">
-                            <option value="">Select Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="course">Course</label>
-                        <input type="text" id="course" name="course" placeholder="e.g., Computer Science">
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="address">Address</label>
-                        <textarea id="address" name="address" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="status">Status</label>
-                        <select id="status" name="status">
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
-                            <option value="Suspended">Suspended</option>
-                            <option value="Graduated">Graduated</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="saveBtn">
-                        <i class="fas fa-save"></i> Save Student
-                    </button>
-                </div>
-            </form>
+            </section>
         </div>
-    </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div class="modal" id="deleteModal">
-        <div class="modal-content small">
-            <div class="modal-header">
-                <h2>Confirm Delete</h2>
-                <button class="close-btn" id="closeDeleteModal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete this student? This action cannot be undone.</p>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-                        <i class="fas fa-trash"></i> Delete
+        <!-- Add/Edit Student Modal -->
+        <div class="modal" id="studentModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalTitle">Add New Student</h2>
+                    <button class="close-btn" id="closeModal">
+                        <i class="fas fa-times"></i>
                     </button>
+                </div>
+                <form id="studentForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="studentId">Student ID *</label>
+                            <input type="text" id="studentId" name="student_id" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="firstName">First Name *</label>
+                            <input type="text" id="firstName" name="first_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name *</label>
+                            <input type="text" id="lastName" name="last_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone</label>
+                            <input type="tel" id="phone" name="phone">
+                        </div>
+                        <div class="form-group">
+                            <label for="dateOfBirth">Date of Birth</label>
+                            <input type="date" id="dateOfBirth" name="date_of_birth">
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select id="gender" name="gender">
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="course">Course</label>
+                            <input type="text" id="course" name="course" placeholder="e.g., Computer Science">
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="address">Address</label>
+                            <textarea id="address" name="address" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status" name="status">
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                                <option value="Suspended">Suspended</option>
+                                <option value="Graduated">Graduated</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="saveBtn">
+                            <i class="fas fa-save"></i> Save Student
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal" id="deleteModal">
+            <div class="modal-content small">
+                <div class="modal-header">
+                    <h2>Confirm Delete</h2>
+                    <button class="close-btn" id="closeDeleteModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this student? This action cannot be undone.</p>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Toast Notifications -->
-    <div class="toast-container" id="toastContainer"></div>
+        <!-- Toast Notifications -->
+        <div class="toast-container" id="toastContainer"></div>
 
-    <script src="script.js"></script>
-</body>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="script.js"></script>
+    </body>
+
 </html>
